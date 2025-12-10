@@ -86,9 +86,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
 
         // Step 5: Apply discount if provided
-        if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
-            applyDiscount(purchase, request.getDiscountCode());
-        }
+        applyDiscount(request, purchase);
 
         // Step 6: Save and return
         Purchase savedPurchase = purchaseRepository.save(purchase);
@@ -96,6 +94,12 @@ public class PurchaseServiceImpl implements PurchaseService {
                 savedPurchase.getOrderNumber(), savedPurchase.getTotalAmount());
 
         return PurchaseResponse.fromEntity(savedPurchase);
+    }
+
+    private void applyDiscount(PurchaseRequest request, Purchase purchase){
+        if (request.getDiscountCode() != null && !request.getDiscountCode().isBlank()) {
+            applyDiscount(purchase, request.getDiscountCode());
+        }
     }
 
     @Override
@@ -343,8 +347,6 @@ public class PurchaseServiceImpl implements PurchaseService {
                     String.format("Cannot transition from %s to %s", current, target));
         }
     }
-
-    // ==================== Inner Classes ====================
 
     private enum DiscountType {
         PERCENTAGE, FIXED
