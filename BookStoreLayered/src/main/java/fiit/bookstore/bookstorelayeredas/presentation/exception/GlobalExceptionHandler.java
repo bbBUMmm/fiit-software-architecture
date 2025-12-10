@@ -4,6 +4,9 @@ import fiit.bookstore.bookstorelayeredas.business.exception.BookNotFoundExceptio
 import fiit.bookstore.bookstorelayeredas.business.exception.BusinessException;
 import fiit.bookstore.bookstorelayeredas.business.exception.DuplicateIsbnException;
 import fiit.bookstore.bookstorelayeredas.business.exception.InsufficientStockException;
+import fiit.bookstore.bookstorelayeredas.business.exception.InvalidDiscountCodeException;
+import fiit.bookstore.bookstorelayeredas.business.exception.InvalidPurchaseStateException;
+import fiit.bookstore.bookstorelayeredas.business.exception.PurchaseNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -65,6 +68,51 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientStockException(InsufficientStockException ex) {
         logger.warn("Insufficient stock: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getErrorCode(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handle PurchaseNotFoundException - returns 404 NOT FOUND
+     */
+    @ExceptionHandler(PurchaseNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePurchaseNotFoundException(PurchaseNotFoundException ex) {
+        logger.warn("Purchase not found: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getErrorCode(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    /**
+     * Handle InvalidDiscountCodeException - returns 400 BAD REQUEST
+     */
+    @ExceptionHandler(InvalidDiscountCodeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDiscountCodeException(InvalidDiscountCodeException ex) {
+        logger.warn("Invalid discount code: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getErrorCode(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handle InvalidPurchaseStateException - returns 400 BAD REQUEST
+     */
+    @ExceptionHandler(InvalidPurchaseStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPurchaseStateException(InvalidPurchaseStateException ex) {
+        logger.warn("Invalid purchase state: {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getErrorCode(),

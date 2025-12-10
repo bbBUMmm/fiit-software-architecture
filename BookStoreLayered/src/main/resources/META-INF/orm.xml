@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+                                     https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <description>ORM mapping for BookStore entities</description>
+    <package>fiit.bookstore.bookstorelayeredas.data.entity</package>
+    <access>FIELD</access>
+
+    <!-- BaseEntity - Mapped Superclass -->
+    <mapped-superclass class="BaseEntity" access="FIELD">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="UUID"/>
+            </id>
+            <basic name="createdAt">
+                <column name="created_at" updatable="false"/>
+            </basic>
+            <basic name="updatedAt">
+                <column name="updated_at"/>
+            </basic>
+        </attributes>
+    </mapped-superclass>
+
+    <!-- Book Entity -->
+    <entity class="Book" access="FIELD">
+        <table name="books"/>
+        <entity-listeners>
+            <entity-listener class="fiit.bookstore.bookstorelayeredas.data.entity.BookEntityListener"/>
+        </entity-listeners>
+        <attributes>
+            <basic name="title">
+                <column nullable="false"/>
+            </basic>
+            <basic name="author">
+                <column nullable="false"/>
+            </basic>
+            <basic name="isbn">
+                <column unique="true"/>
+            </basic>
+            <basic name="price">
+                <column nullable="false" precision="12" scale="2"/>
+            </basic>
+            <basic name="publisher"/>
+            <basic name="publicationYear"/>
+            <basic name="genre"/>
+            <basic name="description">
+                <column length="2000"/>
+            </basic>
+            <basic name="quantity">
+                <column nullable="false"/>
+            </basic>
+            <transient name="available"/>
+        </attributes>
+    </entity>
+
+    <!-- Purchase Entity -->
+    <entity class="Purchase" access="FIELD">
+        <table name="purchases"/>
+        <attributes>
+            <basic name="orderNumber">
+                <column name="order_number" nullable="false" unique="true"/>
+            </basic>
+            <basic name="customerName">
+                <column name="customer_name" nullable="false"/>
+            </basic>
+            <basic name="customerEmail">
+                <column name="customer_email" nullable="false"/>
+            </basic>
+            <basic name="shippingAddress">
+                <column name="shipping_address" length="500"/>
+            </basic>
+            <basic name="subtotal">
+                <column precision="12" scale="2"/>
+            </basic>
+            <basic name="discountAmount">
+                <column name="discount_amount" precision="12" scale="2"/>
+            </basic>
+            <basic name="discountCode">
+                <column name="discount_code"/>
+            </basic>
+            <basic name="totalAmount">
+                <column name="total_amount" precision="12" scale="2"/>
+            </basic>
+            <basic name="totalItems">
+                <column name="total_items"/>
+            </basic>
+            <basic name="status">
+                <column nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="purchaseDate">
+                <column name="purchase_date"/>
+            </basic>
+            <one-to-many name="items" mapped-by="purchase" fetch="EAGER">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <!-- PurchaseItem Entity -->
+    <entity class="PurchaseItem" access="FIELD">
+        <table name="purchase_items"/>
+        <attributes>
+            <basic name="bookTitle">
+                <column name="book_title" nullable="false"/>
+            </basic>
+            <basic name="bookAuthor">
+                <column name="book_author" nullable="false"/>
+            </basic>
+            <basic name="bookIsbn">
+                <column name="book_isbn" nullable="false"/>
+            </basic>
+            <basic name="quantity">
+                <column nullable="false"/>
+            </basic>
+            <basic name="unitPrice">
+                <column name="unit_price" nullable="false" precision="12" scale="2"/>
+            </basic>
+            <basic name="subtotal">
+                <column precision="12" scale="2"/>
+            </basic>
+            <many-to-one name="purchase" fetch="LAZY">
+                <join-column name="purchase_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="book" fetch="LAZY">
+                <join-column name="book_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

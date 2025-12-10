@@ -1,41 +1,31 @@
 package fiit.bookstore.bookstorelayeredas.data.entity;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
  * Book entity representing a book in the bookstore.
- * Demonstrates:
- * - Inheritance: Extends BaseEntity
- * - Encapsulation: Private fields with getters/setters
- * - Validation annotations for data integrity
+ * JPA mappings are defined in orm.xml
  */
-@Entity
-@Table(name = "books")
 public class Book extends BaseEntity {
 
     @NotBlank(message = "Title is required")
     @Size(min = 1, max = 255, message = "Title must be between 1 and 255 characters")
-    @Column(nullable = false)
     private String title;
 
     @NotBlank(message = "Author is required")
     @Size(min = 1, max = 255, message = "Author name must be between 1 and 255 characters")
-    @Column(nullable = false)
     private String author;
 
     @NotBlank(message = "ISBN is required")
     @Pattern(regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$|^[0-9]{13}$|^[0-9]{10}$",
             message = "Invalid ISBN format")
-    @Column(unique = true)
     private String isbn;
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     @Digits(integer = 10, fraction = 2, message = "Price format is invalid")
-    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
     @Size(max = 255, message = "Publisher name cannot exceed 255 characters")
@@ -49,11 +39,9 @@ public class Book extends BaseEntity {
     private String genre;
 
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
-    @Column(length = 2000)
     private String description;
 
     @Min(value = 0, message = "Quantity cannot be negative")
-    @Column(nullable = false)
     private Integer quantity = 0;
 
     // Default constructor for JPA
@@ -154,6 +142,15 @@ public class Book extends BaseEntity {
         return this.quantity != null && this.quantity > 0;
     }
 
+    /**
+     * Check if the book has sufficient quantity for purchase.
+     * @param amount the amount to check
+     * @return true if sufficient quantity is available
+     */
+    public boolean hasStock(int amount) {
+        return this.quantity != null && this.quantity >= amount;
+    }
+
     public void decreaseQuantity(int amount) {
         if (this.quantity - amount < 0) {
             throw new IllegalStateException("Insufficient quantity available");
@@ -161,11 +158,25 @@ public class Book extends BaseEntity {
         this.quantity -= amount;
     }
 
+    /**
+     * Alias for decreaseQuantity - reduces stock when books are purchased.
+     */
+    public void reduceQuantity(int amount) {
+        decreaseQuantity(amount);
+    }
+
     public void increaseQuantity(int amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
         this.quantity += amount;
+    }
+
+    /**
+     * Alias for increaseQuantity - adds stock when order is cancelled or books are restocked.
+     */
+    public void addQuantity(int amount) {
+        increaseQuantity(amount);
     }
 
     @Override
